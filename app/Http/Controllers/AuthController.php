@@ -29,19 +29,13 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         if (!Auth::attempt($request->only('email', 'password'))) {
-            return response([
-                'error' => 'Invalid credentials'
-            ]);
+            return response(['error' => 'Invalid credentials']);
         }
 
         $user = Auth::user();
         $token = $user->createToken('token')->plainTextToken;
 
-        $cookie = cookie('token', $token, 60 * 24);
-
-        return response(
-            ['token' => $token]
-        )->withCookie($cookie);
+        return response(['token' => $token]);
     }
 
     public function user(Request $request)
@@ -49,13 +43,12 @@ class AuthController extends Controller
         return $request->user();
     }
 
-    public function logout()
+    public function logout(Request $request)
     {
-        $cookie = Cookie::forget('token');
+        $user = $request->user();
+        $user->tokens()->where('id', $user->currentAccessToken()->id)->delete();
 
-        return response(
-            ['message' => 'success']
-        )->withCookie($cookie);
+        return response(['message' => 'success']);
     }
 
     public function updateInfo(UpdateInfoRequest $request)

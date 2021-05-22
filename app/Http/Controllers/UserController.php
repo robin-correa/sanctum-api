@@ -16,8 +16,15 @@ class UserController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
+        $search = $request->get('search');
+        if ($search != "") {
+            return User::where('first_name', 'LIKE', '%' . $search . '%')
+                ->orWhere('last_name', 'LIKE', '%' . $search . '%')
+                ->orderBy('first_name', 'ASC')->paginate(10)->withQueryString();
+        }
+
         return User::paginate(10);
     }
 
